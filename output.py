@@ -26,7 +26,7 @@ def main():
     elif o == 2:
         from output_obj2 import model, Zipcode1
     else:
-        from output_obj3 import model, Zipcode
+        from output_obj3 import model, Zipcode1
 
 if __name__ == "__main__":
     main()

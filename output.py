@@ -20,13 +20,14 @@ def main():
         format_func=lambda x: f"Objective {x}"
     )
 
-    # Import the appropriate model based on user selection
-    if o == 1:
-        from output_obj1 import model, Zipcode1
-    elif o == 2:
-        from output_obj2 import model, Zipcode1
-    else:
-        from output_obj3 import model, Zipcode1
-
+    if st.button("Run Model"):
+        # Import the appropriate model based on user selection
+        if o == 1:
+            from output_obj1 import model, Zipcode1
+        elif o == 2:
+            from output_obj2 import model, Zipcode1
+        else:
+            from output_obj3 import model, Zipcode1
+    pass
 if __name__ == "__main__":
     main()

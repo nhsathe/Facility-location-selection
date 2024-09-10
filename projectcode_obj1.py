@@ -77,9 +77,9 @@ model.J= Set(initialize=range(1,19))
 import streamlit as st
 
 P = st.number_input("Enter number of support centers to be built:", 
-                             min_value=0,  # No minimum value
+                             min_value=1,  # No minimum value
                              max_value=18,  # No maximum value
-                             value=0,  # Default value
+                             value=1,  # Default value
                              step=1) 
 
 

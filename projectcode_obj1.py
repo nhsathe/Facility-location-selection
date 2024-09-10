@@ -134,7 +134,8 @@ solver.solve(model)
 for i in model.I:
     if pyo.value(model.y[i]==1):
         print("Support center should be built at zipcodes", Zipcode1[i-1]) 
-    
+        st.write("Support center should be built at zipcodes:")
+        st.dataframe(Zipcode1[i-1])
 model.pprint()
 
  

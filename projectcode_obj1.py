@@ -65,23 +65,16 @@ for i in range(18):
     print(dist_mat)      
     df = pd.DataFrame(dist_mat).T
 #df.to_excel(excel_writer = "D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.xlsx")
-df.to_csv("D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.csv")
-
+#df.to_csv("D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.csv")
+print(df)
 
 #Create model
 model= ConcreteModel(name = "Support center optimization")
 model.I=Set(initialize=range(1,19))
 model.J= Set(initialize=range(1,19))
-#P=int(input("Enter number of support centers to be built:"))
+P=int(input("Enter number of support centers to be built:"))
 
-import tkinter as tk
-from tkinter import simpledialog
 
-ROOT = tk.Tk()
-
-ROOT.withdraw()
-# the input dialog
-P=simpledialog.askinteger(title="User input",prompt="Enter number of support centers to be built:")
 
 
 

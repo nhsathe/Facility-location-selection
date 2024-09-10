@@ -138,7 +138,7 @@ model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipco
     
     
 #Solve
-solver= SolverFactory('gurobi')
+solver= SolverFactory('glpk')
 solver.solve(model)
 
  

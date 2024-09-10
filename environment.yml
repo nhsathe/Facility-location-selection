@@ -6,5 +6,6 @@ dependencies:
   - pyomo
   - glpk
   - pip
+  - pulp
   - pip:
     - streamlit

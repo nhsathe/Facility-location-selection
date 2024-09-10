@@ -13,10 +13,9 @@ model = ConcreteModel(name = "Greenville_zip_codes")
 import pandas as pd
 import sys
 import numpy as np
-from output import P
 import streamlit as st
 
-
+P = st.session_state.P
 d=pd.read_csv ('Database.csv')
 
 

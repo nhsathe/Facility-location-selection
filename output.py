@@ -11,20 +11,20 @@ import pyomo.environ as pyo
 from pyomo.environ import *
 
 def main():
-    st.title("Pyomo Model Selector")
+    st.title("Facility Location Seletion")
 
     # Create a dropdown for objective selection
     o = st.selectbox(
-        "Select objective number",
-        options=[1, 2, 3],
-        format_func=lambda x: f"Objective {x}"
+        "Select objective",
+        options=["P-Median", "K-Center", "MCLP"]
     )
+    P = st.slider("Select number of support centers to be built", min_value=1, max_value=18, value=3)
 
     if st.button("Run Model"):
         # Import the appropriate model based on user selection
-        if o == 1:
+        if o == "P-Median":
             from output_obj1 import model, Zipcode1
-        elif o == 2:
+        elif o == "K-Center":
             from output_obj2 import model, Zipcode1
         else:
             from output_obj3 import model, Zipcode1

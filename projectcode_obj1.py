@@ -72,9 +72,15 @@ print(df)
 model= ConcreteModel(name = "Support center optimization")
 model.I=Set(initialize=range(1,19))
 model.J= Set(initialize=range(1,19))
-P=int(input("Enter number of support centers to be built:"))
+#P=int(input("Enter number of support centers to be built:"))
 
+import streamlit as st
 
+P = st.number_input("Enter number of support centers to be built:", 
+                             min_value=0,  # No minimum value
+                             max_value=18,  # No maximum value
+                             value=0,  # Default value
+                             step=1) 
 
 
 

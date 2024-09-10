@@ -12,7 +12,7 @@ import pandas as pd
 import sys
 import numpy as np
 import streamlit as st
-
+from output import P
 
 
 d=pd.read_csv ('Database.csv')
@@ -113,7 +113,7 @@ def zip_code_assignment_rule(model,j):
 model.zip_code_assignment= Constraint(model.J,rule=zip_code_assignment_rule)    
 
 
-model.number_support_center= Constraint(expr =sum (model.y[i] for i in model.I)== output.P)
+model.number_support_center= Constraint(expr =sum (model.y[i] for i in model.I)==P)
     
           
                         

@@ -10,6 +10,9 @@ import importlib
 import pyomo.environ as pyo
 from pyomo.environ import *
 
+if 'P' not in st.session_state:
+    st.session_state.P = 3 
+
 def main():
     st.title("Facility Location Seletion")
 
@@ -18,7 +21,8 @@ def main():
         "Select objective",
         options=["P-Median", "K-Center", "MCLP"]
     )
-    P = st.slider("Select number of support centers to be built", min_value=1, max_value=18, value=3)
+    P = st.slider("Select number of support centers to be built", min_value=1, max_value=18, value=st.session_state.P)
+    st.session_state.P = P  # Update session state
 
     if st.button("Run Model"):
         # Import the appropriate model based on user selection

@@ -2,3 +2,4 @@ streamlit
 pyomo
 gurobipy
 coinor-cbc
+glpk

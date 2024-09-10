@@ -12,9 +12,9 @@ import pandas as pd
 import sys
 import numpy as np
 import streamlit as st
-from output import P
 
 
+P = st.session_state.P
 d=pd.read_csv ('Database.csv')
 
 

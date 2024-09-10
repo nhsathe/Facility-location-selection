@@ -5,22 +5,24 @@ Created on Wed Dec  7 07:48:56 2022
 @author: Nishank
 """
 
+import streamlit as st
 import pyomo.environ as pyo
 from pyomo.environ import *
 
+def main():
+    st.title("Pyomo Model Selector")
 
-import tkinter as tk
-from tkinter import simpledialog
+    # Create a dropdown for objective selection
+    o = st.selectbox(
+        "Select objective number",
+        options=[1, 2, 3],
+        format_func=lambda x: f"Objective {x}"
+    )
 
-ROOT = tk.Tk()
-
-ROOT.withdraw()
-# the input dialog
-o=simpledialog.askinteger(title="User input",prompt="Enter objective number(e.g. 1,2,3):")
-
-if o==1:
-    from output_obj1 import model,Zipcode1 
-elif o==2:
-    from output_obj2 import model,Zipcode1
-else:
-    from output_obj3 import model,Zipcode1    
+    # Import the appropriate model based on user selection
+    if o == 1:
+        from output_obj1 import model, Zipcode1
+    elif o == 2:
+        from output_obj2 import model, Zipcode1
+    else:
+        from output_obj3 import model, Zipcode1

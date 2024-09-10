@@ -10,7 +10,7 @@ import pyomo.environ as pyo
 from pyomo.environ import *
 from projectcode_obj3 import model,Zipcode1 
 
-solver= SolverFactory('gurobi')
+solver= SolverFactory('glpk')
 solver.solve(model)
 print("Support centers should be built at zipcode locations:")
 for i in model.I:

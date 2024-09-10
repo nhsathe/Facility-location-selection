@@ -12,7 +12,7 @@ import pandas as pd
 import sys
 import numpy as np
 import streamlit as st
-
+from output import P
 
 
 d=pd.read_csv ('Database.csv')
@@ -77,11 +77,7 @@ model.J= Set(initialize=range(1,19))
 
 
 
-P = st.number_input("Enter number of support centers to be built:", 
-                             min_value=1,  # No minimum value
-                             max_value=18,  # No maximum value
-                             value=1,  # Default value
-                             step=1) 
+
 
 
 

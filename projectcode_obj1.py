@@ -127,12 +127,12 @@ model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipco
 #Solve
 solver= SolverFactory('glpk')
 solver.solve(model)
-
+st.write("Support center should be built at zipcodes:")
 for i in model.I:
     if pyo.value(model.y[i]==1):
         print("Support center should be built at zipcodes", Zipcode1[i-1]) 
-        
-st.write("Support center should be built at zipcodes:",Zipcode1)
+        st.write(Zipcode1[i-1])
+
 model.pprint()
 
  

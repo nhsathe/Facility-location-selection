@@ -11,7 +11,7 @@ model = ConcreteModel(name = "Greenville_zip_codes")
 import pandas as pd
 import sys
 import numpy as np
-
+import streamlit as st
 
 
 
@@ -67,14 +67,15 @@ for i in range(18):
 #df.to_excel(excel_writer = "D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.xlsx")
 #df.to_csv("D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.csv")
 print(df)
-
+st.write("Distance matrix:")
+st.table(df)
 #Create model
 model= ConcreteModel(name = "Support center optimization")
 model.I=Set(initialize=range(1,19))
 model.J= Set(initialize=range(1,19))
 #P=int(input("Enter number of support centers to be built:"))
 
-import streamlit as st
+
 
 P = st.number_input("Enter number of support centers to be built:", 
                              min_value=1,  # No minimum value

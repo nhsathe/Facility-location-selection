@@ -66,7 +66,8 @@ for i in range(18):
 #df.to_excel(excel_writer = "D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.xlsx")
 #df.to_csv("D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.csv")
 print(df)
-
+st.write("Distance matrix:")
+st.table(df)
 #Create model
 model= ConcreteModel(name = "Support center optimization")
 model.I=Set(initialize=range(1,19))
@@ -126,11 +127,11 @@ model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipco
 #Solve
 solver= SolverFactory('glpk')
 solver.solve(model)
-
+st.write("Support center should be built at zipcodes:")
 for i in model.I:
     if pyo.value(model.y[i]==1):
         print("Support center should be built at zipcodes", Zipcode1[i-1]) 
-    
+        st.write(Zipcode1[i-1])
 model.pprint()
 
  

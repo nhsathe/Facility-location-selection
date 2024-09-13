@@ -137,7 +137,9 @@ for i in model.I:
         support_centerlist.append(zipcode)
 
 st.write("Support centers should be built at zipcodes:") 
-st.table(support_centerlist)
+matched_data = d[d['zip code'].isin(support_centerlist)]
+result = matched_data[['zip code', 'latitude', 'longitude']]
+st.table(result)
 model.pprint()
 
  

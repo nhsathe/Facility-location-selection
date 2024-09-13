@@ -143,7 +143,7 @@ result = matched_data[['zip code', 'latitude', 'longitude']]
 st.table(result)
 
 fig = px.scatter_mapbox(result, lat='latitude', lon='longitude', hover_name='zip code',
-                        zoom=3, height=300)
+                        zoom=10, height=900)
 fig.update_layout(mapbox_style="open-street-map")
 st.plotly_chart(fig)
 

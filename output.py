@@ -32,6 +32,5 @@ def main():
             from output_obj2 import model, Zipcode1
         else:
             from output_obj3 import model, Zipcode1
-    pass
 if __name__ == "__main__":
     main()

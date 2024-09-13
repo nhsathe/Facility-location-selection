@@ -10,8 +10,8 @@ import importlib
 import pyomo.environ as pyo
 from pyomo.environ import *
 
-if 'P' not in st.session_state:
-    st.session_state.P = 3 
+#if 'P' not in st.session_state:
+    #st.session_state.P = 3 
 
 def main():
     st.title("Facility Location Seletion")

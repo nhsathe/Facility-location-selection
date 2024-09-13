@@ -133,7 +133,7 @@ for i in model.I:
         print("Support center should be built at zipcodes", Zipcode1[i-1]) 
         st.write(Zipcode1[i-1])
         maplist = []
-        maplist.append([Zipcode1[i-1]])
+        maplist.append(Zipcode1[i-1])
 st.write(maplist)        
 model.pprint()
 

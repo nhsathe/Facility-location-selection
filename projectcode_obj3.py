@@ -68,6 +68,8 @@ for i in range(18):
 #df.to_excel(excel_writer = "D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.xlsx")
 #df.to_csv("D:/MSIE sem 1/IE 8030 Engineering optimaiztion and applications/IE8030 Project/distance.csv")
 print(df)
+st.write("Distance matrix:")
+st.table(df)
 
 #Create model
 model= ConcreteModel(name = "Support center optimization")

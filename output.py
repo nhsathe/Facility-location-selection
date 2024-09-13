@@ -33,7 +33,7 @@ def main():
         elif o == "MCLP":
             from output_obj3 import model, Zipcode1
         else:
-            continue
+            pass
            
 if __name__ == "__main__":
     main()

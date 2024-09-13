@@ -12,6 +12,7 @@ import pandas as pd
 import sys
 import numpy as np
 import streamlit as st
+import plotly.express as px
 
 
 P = st.session_state.P
@@ -140,6 +141,12 @@ st.write("Support centers should be built at zipcodes:")
 matched_data = d[d['zip code'].isin(support_centerlist)]
 result = matched_data[['zip code', 'latitude', 'longitude']]
 st.table(result)
+
+fig = px.scatter_mapbox(result, lat='latitude', lon='longitude', hover_name='zip code',
+                        zoom=3, height=300)
+fig.update_layout(mapbox_style="open-street-map")
+st.plotly_chart(fig)
+
 model.pprint()
 
  

@@ -7,4 +7,5 @@ dependencies:
   - glpk
   - pip
   - pulp
+  - plotly
   

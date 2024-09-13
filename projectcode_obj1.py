@@ -135,7 +135,8 @@ for i in model.I:
         #st.write(Zipcode1[i-1])
         zipcode = Zipcode1[i-1]  
         support_centerlist.append(zipcode)
-  st.write("Support centers should be built at zipcodes:", support_centerlist)      
+
+st.write("Support centers should be built at zipcodes:", support_centerlist) 
 model.pprint()
 
  

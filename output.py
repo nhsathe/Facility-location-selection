@@ -30,8 +30,10 @@ def main():
             from output_obj1 import model, Zipcode1
         elif o == "K-Center":
             from output_obj2 import model, Zipcode1
-        else:
+        elif o == "MCLP":
             from output_obj3 import model, Zipcode1
-     continue       
+        else:
+            continue
+           
 if __name__ == "__main__":
     main()

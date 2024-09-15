@@ -30,4 +30,4 @@ for i in model.I:
          for j in model.J:
              if value(model.x[i,j]==1):
                  print(Zipcode1[j-1],"is=",pyo.value(model.d[i,j]),"miles")                 
-output.main()
+

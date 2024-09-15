@@ -129,14 +129,17 @@ model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipco
 solver= SolverFactory('glpk')
 solver.solve(model)
 support_centerlist = []
-
+customer_list = []
 for i in model.I:
     if pyo.value(model.y[i]==1):
         #print("Support center should be built at zipcodes", Zipcode1[i-1]) 
         #st.write(Zipcode1[i-1])
         zipcode = Zipcode1[i-1]  
         support_centerlist.append(zipcode)
-
+    else:
+        zipcode = Zipcode1[i-1] 
+        customer_list.append(zipcode)
+        
 st.write("Support centers should be built at zipcodes:") 
 matched_data = d[d['zip code'].isin(support_centerlist)]
 result = matched_data[['zip code', 'latitude', 'longitude']]

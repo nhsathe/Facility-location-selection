@@ -8,6 +8,7 @@ Created on Mon Nov 28 19:16:00 2022
 import pyomo.environ as pyo
 from pyomo.environ import *
 from projectcode_obj1 import model,Zipcode1 
+import output
 
 solver= SolverFactory('glpk')
 solver.solve(model)
@@ -29,3 +30,4 @@ for i in model.I:
          for j in model.J:
              if value(model.x[i,j]==1):
                  print(Zipcode1[j-1],"is=",pyo.value(model.d[i,j]),"miles")                 
+output.main()

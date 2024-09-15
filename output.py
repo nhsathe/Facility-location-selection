@@ -23,7 +23,9 @@ def main():
     )
     P = st.slider("Select number of support centers to be built", min_value=1, max_value=18, value=st.session_state.P)
     st.session_state.P = P  # Update session state
-
+    d=pd.read_csv ('Database.csv')
+    st.write("Input data:")
+    st.table(d)
     if st.button("Run Model"):  
         # Import the appropriate model based on user selection
         if o == "P-Median":

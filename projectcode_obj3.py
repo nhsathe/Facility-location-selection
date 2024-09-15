@@ -14,6 +14,7 @@ import pandas as pd
 import sys
 import numpy as np
 import streamlit as st
+import plotly.express as px
 
 P = st.session_state.P
 d=pd.read_csv ('Database.csv')
@@ -137,8 +138,24 @@ model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipco
 #Solve
 solver= SolverFactory('glpk')
 solver.solve(model)
+support_centerlist = []
 
- 
+for i in model.I:
+    if pyo.value(model.y[i]==1):
+        #print("Support center should be built at zipcodes", Zipcode1[i-1]) 
+        #st.write(Zipcode1[i-1])
+        zipcode = Zipcode1[i-1]  
+        support_centerlist.append(zipcode)
+
+st.write("Support centers should be built at zipcodes:") 
+matched_data = d[d['zip code'].isin(support_centerlist)]
+result = matched_data[['zip code', 'latitude', 'longitude']]
+st.table(result)
+
+fig = px.scatter_mapbox(result, lat='latitude', lon='longitude', hover_name='zip code',
+                        zoom=10, height=800)
+fig.update_layout(mapbox_style="open-street-map")
+st.plotly_chart(fig)
     
 model.pprint()
 

@@ -9,6 +9,7 @@ import streamlit as st
 import importlib
 import pyomo.environ as pyo
 from pyomo.environ import *
+import pandas as pd
 
 if 'P' not in st.session_state:
     st.session_state.P = 3 

@@ -122,7 +122,9 @@ def restrict_zipcode_assigment_rule(model,i,j):
     return model.x[i,j] <= model.y[i]   
 
 model.restrict_zipcode_assigment= Constraint(model.I,model.J,rule=restrict_zipcode_assigment_rule)
-    
+
+
+support_centerlist = []   
     
 #Solve
 solver= SolverFactory('glpk')
@@ -131,7 +133,20 @@ st.write("Support center should be built at zipcodes:")
 for i in model.I:
     if pyo.value(model.y[i]==1):
         print("Support center should be built at zipcodes", Zipcode1[i-1]) 
-        st.write(Zipcode1[i-1])
+        #st.write(Zipcode1[i-1])
+        zipcode = Zipcode1[i-1] 
+        support_centerlist.append(zipcode)
+
+
+st.write("Support centers should be built at zipcodes:") 
+matched_data = d[d['zip code'].isin(support_centerlist)]
+result = matched_data[['zip code', 'latitude', 'longitude']]
+st.table(result)
+
+fig = px.scatter_mapbox(result, lat='latitude', lon='longitude', hover_name='zip code',
+                        zoom=10, height=800)
+fig.update_layout(mapbox_style="open-street-map")
+st.plotly_chart(fig)       
 model.pprint()
 
  

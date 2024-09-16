@@ -93,17 +93,11 @@ def main():
     file = 'Database.csv'
     data = load_data(file)
 
-    # Display the columns to debug
-    st.write("Columns in the loaded data:")
-    st.write(data.columns)
-
     # Allow users to edit the data
     st.write("Edit the input data:")
     edited_data = st.data_editor(data, use_container_width=True)
 
-    # Display the edited data
-    st.write("Updated input data:")
-    st.dataframe(edited_data)
+
 
     # Check column names for compatibility
     if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns:

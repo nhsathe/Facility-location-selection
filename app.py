@@ -140,7 +140,7 @@ def main():
 
         #Display support centers
         st.write("Selected support center locations:")
-        st.table(support_centers)
+        st.dataframe(support_centers)
         
 
         for i in model.I:

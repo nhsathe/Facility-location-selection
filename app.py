@@ -25,7 +25,7 @@ def load_data(file):
         st.write("First few rows of the data:")
         st.dataframe(data.head())
         # Check required columns
-        required_columns = {'zip_code', 'latitude', 'longitude', 'population'}
+        required_columns = {'zip_code', 'latitude', 'longitude', 'estimated_population'}
         missing_columns = required_columns - set(data.columns)
         if missing_columns:
             raise ValueError(f"CSV file is missing the following columns: {missing_columns}")
@@ -112,15 +112,15 @@ def main():
     st.dataframe(edited_data)
 
     # Check column names for compatibility
-    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns or 'population' not in edited_data.columns:
-        st.error("CSV file must contain 'zip_code', 'latitude', 'longitude', and 'population' columns.")
+    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns or 'estimated_population' not in edited_data.columns:
+        st.error("CSV file must contain 'zip_code', 'latitude', 'longitude', and 'estimated_population' columns.")
         return
 
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
     latitude1 = edited_data['latitude'].tolist()
     longitude1 = edited_data['longitude'].tolist()
-    population = edited_data['population'].tolist()
+    population = edited_data['estimated_population'].tolist()
 
     # Calculate distance matrix
     dist_mat = calculate_distances(edited_data)

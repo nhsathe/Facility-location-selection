@@ -141,65 +141,69 @@ def main():
             return
 
         # Extract results
-        support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]
-        assignments = {zipcode: [] for zipcode in support_centers}
+        try:
+            support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]
+            assignments = {zipcode: [] for zipcode in support_centers}
 
-        for i in model.I:
-            for j in model.J:
-                if pyo.value(model.x[i, j]) == 1:
-                    assignments[Zipcode1[i - 1]].append(Zipcode1[j - 1])
+            for i in model.I:
+                for j in model.J:
+                    if pyo.value(model.x[i, j]) == 1:
+                        assignments[Zipcode1[i - 1]].append(Zipcode1[j - 1])
 
-        # Display assignments
-        st.write("Assignments:")
-        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
-        st.dataframe(assignment_df)
+            # Display assignments
+            st.write("Assignments:")
+            assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
+            st.dataframe(assignment_df)
 
-        # Prepare data for visualization
-        result_data = edited_data[edited_data['zip_code'].isin(support_centers)]
-        fig = go.Figure()
+            # Prepare data for visualization
+            result_data = edited_data[edited_data['zip_code'].isin(support_centers)]
+            fig = go.Figure()
 
-        # Add scatter points for support centers
-        fig.add_trace(go.Scattermapbox(
-            lat=result_data['latitude'],
-            lon=result_data['longitude'],
-            mode='markers',
-            marker=dict(size=10, color='blue'),
-            text=result_data['zip_code'],
-            name='Support Centers'
-        ))
+            # Add scatter points for support centers
+            fig.add_trace(go.Scattermapbox(
+                lat=result_data['latitude'],
+                lon=result_data['longitude'],
+                mode='markers',
+                marker=dict(size=10, color='blue'),
+                text=result_data['zip_code'],
+                name='Support Centers'
+            ))
 
-        # Add scatter points for other locations
-        other_data = edited_data[~edited_data['zip_code'].isin(support_centers)]
-        fig.add_trace(go.Scattermapbox(
-            lat=other_data['latitude'],
-            lon=other_data['longitude'],
-            mode='markers',
-            marker=dict(size=8, color='red'),
-            text=other_data['zip_code'],
-            name='Other Locations'
-        ))
+            # Add scatter points for other locations
+            other_data = edited_data[~edited_data['zip_code'].isin(support_centers)]
+            fig.add_trace(go.Scattermapbox(
+                lat=other_data['latitude'],
+                lon=other_data['longitude'],
+                mode='markers',
+                marker=dict(size=8, color='red'),
+                text=other_data['zip_code'],
+                name='Other Locations'
+            ))
 
-        # Add arcs connecting locations to their assigned support centers
-        for sc, locs in assignments.items():
-            sc_lat, sc_lon = edited_data[edited_data['zip_code'] == sc][['latitude', 'longitude']].values[0]
-            for loc in locs:
-                loc_lat, loc_lon = edited_data[edited_data['zip_code'] == loc][['latitude', 'longitude']].values[0]
-                distance = spherical_dist([sc_lat, sc_lon], [loc_lat, loc_lon])
-                fig.add_trace(go.Scattermapbox(
-                    lat=[sc_lat, loc_lat],
-                    lon=[sc_lon, loc_lon],
-                    mode='lines',
-                    line=dict(width=2, color='black'),
-                    name=f'Cost: {distance:.2f}'
-                ))
+            # Add arcs connecting locations to their assigned support centers
+            for sc, locs in assignments.items():
+                sc_lat, sc_lon = edited_data[edited_data['zip_code'] == sc][['latitude', 'longitude']].values[0]
+                for loc in locs:
+                    loc_lat, loc_lon = edited_data[edited_data['zip_code'] == loc][['latitude', 'longitude']].values[0]
+                    distance = spherical_dist([sc_lat, sc_lon], [loc_lat, loc_lon])
+                    fig.add_trace(go.Scattermapbox(
+                        lat=[sc_lat, loc_lat],
+                        lon=[sc_lon, loc_lon],
+                        mode='lines',
+                        line=dict(width=2, color='black'),
+                        name=f'Cost: {distance:.2f}'
+                    ))
 
-        fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
-        st.plotly_chart(fig)
+            fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
+            st.plotly_chart(fig)
 
-        st.write("Model Results:")
-        st.write(f"Objective Value: {pyo.value(model.objective)}")
-        st.write("Model details:")
-        model.pprint()
+            st.write("Model Results:")
+            st.write(f"Objective Value: {pyo.value(model.objective)}")
+            st.write("Model details:")
+            model.pprint()
+
+        except Exception as e:
+            st.error(f"Error processing results: {e}")
 
 if __name__ == "__main__":
     main()

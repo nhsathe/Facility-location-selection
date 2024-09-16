@@ -150,7 +150,7 @@ def main():
 
         # Display allocations
         st.write("Allocations:")
-        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Allocated Zipcode Location'])
+        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Locations served'])
         st.dataframe(assignment_df)
 
         # Prepare data for visualization

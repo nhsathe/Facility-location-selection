@@ -139,7 +139,8 @@ def main():
         assignments = {zipcode: [] for zipcode in support_centers}
 
         #Display support centers
-        st.write("Selected support center locations:",support_centers)
+        st.write("Selected support center locations:")
+        st.table(support_centers)
         
 
         for i in model.I:

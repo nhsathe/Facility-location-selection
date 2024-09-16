@@ -94,7 +94,7 @@ def main():
     data = load_data(file)
 
     # Allow users to edit the data
-    st.write("Edit the input data:")
+    st.write("Input data:")
     edited_data = st.data_editor(data, use_container_width=True)
 
 
@@ -111,7 +111,7 @@ def main():
 
     # Calculate distance matrix
     dist_mat = calculate_distances(edited_data)
-    st.write("Distance matrix:")
+    st.write("Calculated distance matrix:")
     st.dataframe(dist_mat)
 
     # Select number of support centers and objective function
@@ -138,14 +138,18 @@ def main():
         support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]
         assignments = {zipcode: [] for zipcode in support_centers}
 
+        #Display support centers
+        st.write("Selected support center locations:",support_centers)
+        
+
         for i in model.I:
             for j in model.J:
                 if pyo.value(model.x[i, j]) == 1:
                     assignments[Zipcode1[i - 1]].append(Zipcode1[j - 1])
 
-        # Display assignments
-        st.write("Assignments:")
-        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
+        # Display allocations
+        st.write("Allocations:")
+        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Allocated Zipcode Location'])
         st.dataframe(assignment_df)
 
         # Prepare data for visualization

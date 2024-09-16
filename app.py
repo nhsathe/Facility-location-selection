@@ -10,9 +10,7 @@ from pyomo.environ import *
 import pandas as pd
 import numpy as np
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
-from io import StringIO
 
 # Function to calculate spherical distance
 def spherical_dist(pos1, pos2, r=3958.75):
@@ -43,7 +41,7 @@ def calculate_distances(data):
     return dist_mat
 
 # Create model with different objectives
-def create_model(distances, population, P, objective_type):
+def create_model(distances, P, objective_type):
     num_locations = len(distances)
     model = pyo.ConcreteModel(name="Support Center Optimization")
     
@@ -52,34 +50,23 @@ def create_model(distances, population, P, objective_type):
     
     model.x = pyo.Var(model.I, model.J, within=pyo.Binary)
     model.y = pyo.Var(model.I, within=pyo.Binary)
-    model.p = pyo.Var(model.J, within=pyo.NonNegativeIntegers)
     model.d = pyo.Param(model.I, model.J, initialize=lambda model, i, j: distances.iloc[i-1, j-1])
-    model.s = pyo.Var(model.I, model.J, within=pyo.Binary)
-    model.m = pyo.Var(model.J, within=pyo.Binary)
     
     # Objective functions
     if objective_type == 'P-Median':
         model.objective = pyo.Objective(
-            expr=sum(sum(model.x[i, j] * model.d[i, j] for i in model.I) for j in model.J),
+            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
             sense=pyo.minimize
         )
     elif objective_type == 'K-Center':
         model.objective = pyo.Objective(
-            expr=sum(max(model.d[i, j] * model.x[i, j] for i in model.I) for j in model.J),
+            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
             sense=pyo.minimize
         )
     elif objective_type == 'MCLP':
-        for i in range(num_locations):
-            for j in range(num_locations):
-                model.s[i+1, j+1] = 1 if pyo.value(model.d[i+1, j+1]) <= 5 else 0
-        
         model.objective = pyo.Objective(
-            expr=sum(0.1 * model.p[j] * model.m[j] for j in model.J),
+            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
             sense=pyo.maximize
-        )
-        model.distance = pyo.Constraint(
-            model.I, model.J,
-            rule=lambda model, i, j: sum(model.x[i, j] * model.s[i, j] for i in model.I) == model.m[j]
         )
     
     # Constraints
@@ -106,6 +93,10 @@ def main():
     file = 'Database.csv'
     data = load_data(file)
 
+    # Display the columns to debug
+    st.write("Columns in the loaded data:")
+    st.write(data.columns)
+
     # Allow users to edit the data
     st.write("Edit the input data:")
     edited_data = st.data_editor(data, use_container_width=True)
@@ -114,9 +105,13 @@ def main():
     st.write("Updated input data:")
     st.dataframe(edited_data)
 
+    # Check column names for compatibility
+    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns:
+        st.error("CSV file must contain 'zip_code', 'latitude', and 'longitude' columns.")
+        return
+
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
-    population1 = edited_data['estimated_population'].tolist()
     latitude1 = edited_data['latitude'].tolist()
     longitude1 = edited_data['longitude'].tolist()
 
@@ -134,9 +129,16 @@ def main():
 
     # Run the model
     if st.button("Run Model"):
-        model = create_model(dist_mat, population1, P, objective_type)
+        model = create_model(dist_mat, P, objective_type)
         solver = pyo.SolverFactory('glpk')
-        results = solver.solve(model)
+
+        # Ensure the solver is correctly applied
+        results = solver.solve(model, tee=True)
+
+        # Check solver status
+        if results.solver.status != pyo.SolverStatus.ok:
+            st.error(f"Solver status: {results.solver.status}. Model may not be solved correctly.")
+            return
 
         # Extract results
         support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]

@@ -21,10 +21,8 @@ def spherical_dist(pos1, pos2, r=3958.75):
 def load_data(file):
     try:
         data = pd.read_csv(file)
-        # Display the first few rows for verification
         st.write("First few rows of the data:")
         st.dataframe(data.head())
-        # Check required columns
         required_columns = {'zip_code', 'latitude', 'longitude', 'estimated_population'}
         missing_columns = required_columns - set(data.columns)
         if missing_columns:
@@ -57,7 +55,7 @@ def create_model(distances, P, population, objective_type):
     model.y = pyo.Var(model.I, within=pyo.Binary)  # Support center indicator
     model.d = pyo.Param(model.I, model.J, initialize=lambda model, i, j: distances.iloc[i-1, j-1])
     model.p = pyo.Param(model.I, initialize=lambda model, i: population[i-1])
-    
+
     # Objective functions
     if objective_type == 'P-Median':
         model.objective = pyo.Objective(
@@ -139,7 +137,7 @@ def main():
         model = create_model(dist_mat, P, population, objective_type)
         solver = pyo.SolverFactory('glpk')
 
-        # Ensure the solver is correctly applied
+        # Solve the model
         results = solver.solve(model, tee=True)
 
         # Check solver status

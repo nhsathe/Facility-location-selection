@@ -37,11 +37,6 @@ def main():
        
         model, Zipcode1 = load_model(o)
         
-  
-        st.write(f"Running {o} model with P = {P}")
-     
-        
-        st.write("Model executed successfully. Results would be displayed here.")
 
 if __name__ == "__main__":
     main()

@@ -41,8 +41,7 @@ def main():
             from output_obj2 import model, Zipcode1
         elif o == "MCLP":
             from output_obj3 import model, Zipcode1
-        else:
-            pass
+
     clear_session_state()
        
 if __name__ == "__main__":

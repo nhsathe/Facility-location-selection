@@ -14,6 +14,12 @@ import pandas as pd
 if 'P' not in st.session_state:
     st.session_state.P = 3 
 
+def clear_session_state():
+    """Clears all keys in the session state."""
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+
+
 def main():
     st.title("Facility Location Seletion")
 
@@ -37,6 +43,7 @@ def main():
             from output_obj3 import model, Zipcode1
         else:
             pass
-           
+   clear_session_state()
+   st.experimental_rerun()         
 if __name__ == "__main__":
         main()

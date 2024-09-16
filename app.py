@@ -1,5 +1,4 @@
 import pyomo.environ as pyo
-from pyomo.environ import *
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -21,8 +20,6 @@ def spherical_dist(pos1, pos2, r=3958.75):
 def load_data(file):
     try:
         data = pd.read_csv(file)
-        st.write("First few rows of the data:")
-        st.dataframe(data.head())
         required_columns = {'zip_code', 'latitude', 'longitude', 'estimated_population'}
         missing_columns = required_columns - set(data.columns)
         if missing_columns:
@@ -97,7 +94,6 @@ def main():
     file = 'Database.csv'
     data = load_data(file)
 
-    # Check if data is loaded successfully
     if data.empty:
         return
 
@@ -105,11 +101,9 @@ def main():
     st.write("Edit the input data:")
     edited_data = st.data_editor(data, use_container_width=True)
 
-    # Display the edited data
     st.write("Updated input data:")
     st.dataframe(edited_data)
 
-    # Check column names for compatibility
     if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns or 'estimated_population' not in edited_data.columns:
         st.error("CSV file must contain 'zip_code', 'latitude', 'longitude', and 'estimated_population' columns.")
         return
@@ -132,17 +126,18 @@ def main():
         options=['P-Median', 'K-Center', 'MCLP']
     )
 
-    # Run the model
     if st.button("Run Model"):
         model = create_model(dist_mat, P, population, objective_type)
         solver = pyo.SolverFactory('glpk')
 
-        # Solve the model
-        results = solver.solve(model, tee=True)
-
-        # Check solver status
-        if results.solver.status != pyo.SolverStatus.ok:
-            st.error(f"Solver status: {results.solver.status}. Model may not be solved correctly.")
+        try:
+            # Solve the model
+            results = solver.solve(model, tee=True)
+            if results.solver.status != pyo.SolverStatus.ok:
+                st.error(f"Solver status: {results.solver.status}. Model may not be solved correctly.")
+                return
+        except Exception as e:
+            st.error(f"Error solving the model: {e}")
             return
 
         # Extract results

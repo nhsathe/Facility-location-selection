@@ -19,8 +19,20 @@ def spherical_dist(pos1, pos2, r=3958.75):
 
 # Load and preprocess data
 def load_data(file):
-    data = pd.read_csv(file)
-    return data
+    try:
+        data = pd.read_csv(file)
+        # Display the first few rows for verification
+        st.write("First few rows of the data:")
+        st.dataframe(data.head())
+        # Check required columns
+        required_columns = {'zip_code', 'latitude', 'longitude', 'population'}
+        missing_columns = required_columns - set(data.columns)
+        if missing_columns:
+            raise ValueError(f"CSV file is missing the following columns: {missing_columns}")
+        return data
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()  # Return empty DataFrame on error
 
 def calculate_distances(data):
     num_locations = len(data)
@@ -87,9 +99,9 @@ def main():
     file = 'Database.csv'
     data = load_data(file)
 
-    # Display the columns to debug
-    st.write("Columns in the loaded data:")
-    st.write(data.columns)
+    # Check if data is loaded successfully
+    if data.empty:
+        return
 
     # Allow users to edit the data
     st.write("Edit the input data:")

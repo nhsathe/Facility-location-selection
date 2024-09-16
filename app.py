@@ -1,8 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Sep 16 2024
+
+@author: Nishank
+"""
+
 import pyomo.environ as pyo
+from pyomo.environ import *
 import pandas as pd
 import numpy as np
 import streamlit as st
+import plotly.express as px
 import plotly.graph_objects as go
+from io import StringIO
 
 # Function to calculate spherical distance
 def spherical_dist(pos1, pos2, r=3958.75):
@@ -18,16 +28,8 @@ def spherical_dist(pos1, pos2, r=3958.75):
 
 # Load and preprocess data
 def load_data(file):
-    try:
-        data = pd.read_csv(file)
-        required_columns = {'zip_code', 'latitude', 'longitude', 'estimated_population'}
-        missing_columns = required_columns - set(data.columns)
-        if missing_columns:
-            raise ValueError(f"CSV file is missing the following columns: {missing_columns}")
-        return data
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame()  # Return empty DataFrame on error
+    data = pd.read_csv(file)
+    return data
 
 def calculate_distances(data):
     num_locations = len(data)
@@ -41,33 +43,43 @@ def calculate_distances(data):
     return dist_mat
 
 # Create model with different objectives
-def create_model(distances, P, population, objective_type):
+def create_model(distances, population, P, objective_type):
     num_locations = len(distances)
     model = pyo.ConcreteModel(name="Support Center Optimization")
     
     model.I = pyo.Set(initialize=range(1, num_locations + 1))
     model.J = pyo.Set(initialize=range(1, num_locations + 1))
     
-    model.x = pyo.Var(model.I, model.J, within=pyo.Binary)  # Assignment variable
-    model.y = pyo.Var(model.I, within=pyo.Binary)  # Support center indicator
+    model.x = pyo.Var(model.I, model.J, within=pyo.Binary)
+    model.y = pyo.Var(model.I, within=pyo.Binary)
+    model.p = pyo.Var(model.J, within=pyo.NonNegativeIntegers)
     model.d = pyo.Param(model.I, model.J, initialize=lambda model, i, j: distances.iloc[i-1, j-1])
-    model.p = pyo.Param(model.I, initialize=lambda model, i: population[i-1])
-
+    model.s = pyo.Var(model.I, model.J, within=pyo.Binary)
+    model.m = pyo.Var(model.J, within=pyo.Binary)
+    
     # Objective functions
     if objective_type == 'P-Median':
         model.objective = pyo.Objective(
-            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
+            expr=sum(sum(model.x[i, j] * model.d[i, j] for i in model.I) for j in model.J),
             sense=pyo.minimize
         )
     elif objective_type == 'K-Center':
         model.objective = pyo.Objective(
-            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
+            expr=sum(max(model.d[i, j] * model.x[i, j] for i in model.I) for j in model.J),
             sense=pyo.minimize
         )
     elif objective_type == 'MCLP':
+        for i in range(num_locations):
+            for j in range(num_locations):
+                model.s[i+1, j+1] = 1 if pyo.value(model.d[i+1, j+1]) <= 5 else 0
+        
         model.objective = pyo.Objective(
-            expr=sum(model.p[i] * model.x[i, j] for i in model.I for j in model.J if model.d[i, j] <= 5),
+            expr=sum(0.1 * model.p[j] * model.m[j] for j in model.J),
             sense=pyo.maximize
+        )
+        model.distance = pyo.Constraint(
+            model.I, model.J,
+            rule=lambda model, i, j: sum(model.x[i, j] * model.s[i, j] for i in model.I) == model.m[j]
         )
     
     # Constraints
@@ -82,7 +94,7 @@ def create_model(distances, P, population, objective_type):
     
     model.restrict_zipcode_assignment = pyo.Constraint(
         model.I, model.J,
-        rule=lambda model, i, j: model.x[i, j] <= model.y[j]
+        rule=lambda model, i, j: model.x[i, j] <= model.y[i]
     )
     
     return model
@@ -94,25 +106,19 @@ def main():
     file = 'Database.csv'
     data = load_data(file)
 
-    if data.empty:
-        return
-
     # Allow users to edit the data
     st.write("Edit the input data:")
     edited_data = st.data_editor(data, use_container_width=True)
 
+    # Display the edited data
     st.write("Updated input data:")
     st.dataframe(edited_data)
 
-    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns or 'estimated_population' not in edited_data.columns:
-        st.error("CSV file must contain 'zip_code', 'latitude', 'longitude', and 'estimated_population' columns.")
-        return
-
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
+    population1 = edited_data['estimated_population'].tolist()
     latitude1 = edited_data['latitude'].tolist()
     longitude1 = edited_data['longitude'].tolist()
-    population = edited_data['estimated_population'].tolist()
 
     # Calculate distance matrix
     dist_mat = calculate_distances(edited_data)
@@ -126,84 +132,72 @@ def main():
         options=['P-Median', 'K-Center', 'MCLP']
     )
 
+    # Run the model
     if st.button("Run Model"):
-        model = create_model(dist_mat, P, population, objective_type)
+        model = create_model(dist_mat, population1, P, objective_type)
         solver = pyo.SolverFactory('glpk')
-
-        try:
-            # Solve the model
-            results = solver.solve(model, tee=True)
-            if results.solver.status != pyo.SolverStatus.ok:
-                st.error(f"Solver status: {results.solver.status}. Model may not be solved correctly.")
-                return
-        except Exception as e:
-            st.error(f"Error solving the model: {e}")
-            return
+        results = solver.solve(model)
 
         # Extract results
-        try:
-            support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]
-            assignments = {zipcode: [] for zipcode in support_centers}
+        support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]
+        assignments = {zipcode: [] for zipcode in support_centers}
 
-            for i in model.I:
-                for j in model.J:
-                    if pyo.value(model.x[i, j]) == 1:
-                        assignments[Zipcode1[i - 1]].append(Zipcode1[j - 1])
+        for i in model.I:
+            for j in model.J:
+                if pyo.value(model.x[i, j]) == 1:
+                    assignments[Zipcode1[i - 1]].append(Zipcode1[j - 1])
 
-            # Display assignments
-            st.write("Assignments:")
-            assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
-            st.dataframe(assignment_df)
+        # Display assignments
+        st.write("Assignments:")
+        assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
+        st.dataframe(assignment_df)
 
-            # Prepare data for visualization
-            result_data = edited_data[edited_data['zip_code'].isin(support_centers)]
-            fig = go.Figure()
+        # Prepare data for visualization
+        result_data = edited_data[edited_data['zip_code'].isin(support_centers)]
+        fig = go.Figure()
 
-            # Add scatter points for support centers
-            fig.add_trace(go.Scattermapbox(
-                lat=result_data['latitude'],
-                lon=result_data['longitude'],
-                mode='markers',
-                marker=dict(size=10, color='blue'),
-                text=result_data['zip_code'],
-                name='Support Centers'
-            ))
+        # Add scatter points for support centers
+        fig.add_trace(go.Scattermapbox(
+            lat=result_data['latitude'],
+            lon=result_data['longitude'],
+            mode='markers',
+            marker=dict(size=10, color='blue'),
+            text=result_data['zip_code'],
+            name='Support Centers'
+        ))
 
-            # Add scatter points for other locations
-            other_data = edited_data[~edited_data['zip_code'].isin(support_centers)]
-            fig.add_trace(go.Scattermapbox(
-                lat=other_data['latitude'],
-                lon=other_data['longitude'],
-                mode='markers',
-                marker=dict(size=8, color='red'),
-                text=other_data['zip_code'],
-                name='Other Locations'
-            ))
+        # Add scatter points for other locations
+        other_data = edited_data[~edited_data['zip_code'].isin(support_centers)]
+        fig.add_trace(go.Scattermapbox(
+            lat=other_data['latitude'],
+            lon=other_data['longitude'],
+            mode='markers',
+            marker=dict(size=8, color='red'),
+            text=other_data['zip_code'],
+            name='Other Locations'
+        ))
 
-            # Add arcs connecting locations to their assigned support centers
-            for sc, locs in assignments.items():
-                sc_lat, sc_lon = edited_data[edited_data['zip_code'] == sc][['latitude', 'longitude']].values[0]
-                for loc in locs:
-                    loc_lat, loc_lon = edited_data[edited_data['zip_code'] == loc][['latitude', 'longitude']].values[0]
-                    distance = spherical_dist([sc_lat, sc_lon], [loc_lat, loc_lon])
-                    fig.add_trace(go.Scattermapbox(
-                        lat=[sc_lat, loc_lat],
-                        lon=[sc_lon, loc_lon],
-                        mode='lines',
-                        line=dict(width=2, color='black'),
-                        name=f'Cost: {distance:.2f}'
-                    ))
+        # Add arcs connecting locations to their assigned support centers
+        for sc, locs in assignments.items():
+            sc_lat, sc_lon = edited_data[edited_data['zip_code'] == sc][['latitude', 'longitude']].values[0]
+            for loc in locs:
+                loc_lat, loc_lon = edited_data[edited_data['zip_code'] == loc][['latitude', 'longitude']].values[0]
+                distance = spherical_dist([sc_lat, sc_lon], [loc_lat, loc_lon])
+                fig.add_trace(go.Scattermapbox(
+                    lat=[sc_lat, loc_lat],
+                    lon=[sc_lon, loc_lon],
+                    mode='lines',
+                    line=dict(width=2, color='black'),
+                    name=f'Cost: {distance:.2f}'
+                ))
 
-            fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
-            st.plotly_chart(fig)
+        fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
+        st.plotly_chart(fig)
 
-            st.write("Model Results:")
-            st.write(f"Objective Value: {pyo.value(model.objective)}")
-            st.write("Model details:")
-            model.pprint()
-
-        except Exception as e:
-            st.error(f"Error processing results: {e}")
+        st.write("Model Results:")
+        st.write(f"Objective Value: {pyo.value(model.objective)}")
+        st.write("Model details:")
+        model.pprint()
 
 if __name__ == "__main__":
     main()

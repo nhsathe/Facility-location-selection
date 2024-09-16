@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Sep 16 2024
-
-@author: Nishank
-"""
-
 import pyomo.environ as pyo
 from pyomo.environ import *
 import pandas as pd
@@ -41,16 +34,17 @@ def calculate_distances(data):
     return dist_mat
 
 # Create model with different objectives
-def create_model(distances, P, objective_type):
+def create_model(distances, P, population, objective_type):
     num_locations = len(distances)
     model = pyo.ConcreteModel(name="Support Center Optimization")
     
     model.I = pyo.Set(initialize=range(1, num_locations + 1))
     model.J = pyo.Set(initialize=range(1, num_locations + 1))
     
-    model.x = pyo.Var(model.I, model.J, within=pyo.Binary)
-    model.y = pyo.Var(model.I, within=pyo.Binary)
+    model.x = pyo.Var(model.I, model.J, within=pyo.Binary)  # Assignment variable
+    model.y = pyo.Var(model.I, within=pyo.Binary)  # Support center indicator
     model.d = pyo.Param(model.I, model.J, initialize=lambda model, i, j: distances.iloc[i-1, j-1])
+    model.p = pyo.Param(model.I, initialize=lambda model, i: population[i-1])
     
     # Objective functions
     if objective_type == 'P-Median':
@@ -65,7 +59,7 @@ def create_model(distances, P, objective_type):
         )
     elif objective_type == 'MCLP':
         model.objective = pyo.Objective(
-            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
+            expr=sum(model.p[i] * model.x[i, j] for i in model.I for j in model.J if model.d[i, j] <= 5),
             sense=pyo.maximize
         )
     
@@ -81,7 +75,7 @@ def create_model(distances, P, objective_type):
     
     model.restrict_zipcode_assignment = pyo.Constraint(
         model.I, model.J,
-        rule=lambda model, i, j: model.x[i, j] <= model.y[i]
+        rule=lambda model, i, j: model.x[i, j] <= model.y[j]
     )
     
     return model
@@ -106,14 +100,15 @@ def main():
     st.dataframe(edited_data)
 
     # Check column names for compatibility
-    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns:
-        st.error("CSV file must contain 'zip_code', 'latitude', and 'longitude' columns.")
+    if 'zip_code' not in edited_data.columns or 'latitude' not in edited_data.columns or 'longitude' not in edited_data.columns or 'population' not in edited_data.columns:
+        st.error("CSV file must contain 'zip_code', 'latitude', 'longitude', and 'population' columns.")
         return
 
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
     latitude1 = edited_data['latitude'].tolist()
     longitude1 = edited_data['longitude'].tolist()
+    population = edited_data['population'].tolist()
 
     # Calculate distance matrix
     dist_mat = calculate_distances(edited_data)
@@ -129,7 +124,7 @@ def main():
 
     # Run the model
     if st.button("Run Model"):
-        model = create_model(dist_mat, P, objective_type)
+        model = create_model(dist_mat, P, population, objective_type)
         solver = pyo.SolverFactory('glpk')
 
         # Ensure the solver is correctly applied

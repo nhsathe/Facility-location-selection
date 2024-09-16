@@ -41,7 +41,7 @@ def calculate_distances(data):
     return dist_mat
 
 # Create model with different objectives
-def create_model(distances, population, P, objective_type):
+def create_model(distances, P, objective_type):
     num_locations = len(distances)
     model = pyo.ConcreteModel(name="Support Center Optimization")
     
@@ -50,7 +50,6 @@ def create_model(distances, population, P, objective_type):
     
     model.x = pyo.Var(model.I, model.J, within=pyo.Binary)
     model.y = pyo.Var(model.I, within=pyo.Binary)
-    model.p = pyo.Var(model.J, within=pyo.NonNegativeIntegers)
     model.d = pyo.Param(model.I, model.J, initialize=lambda model, i, j: distances.iloc[i-1, j-1])
     
     # Objective functions
@@ -65,10 +64,8 @@ def create_model(distances, population, P, objective_type):
             sense=pyo.minimize
         )
     elif objective_type == 'MCLP':
-        # This is inherently nonlinear if we keep it, you might need to use different solver
-        # Simplified to a linear approximation or switch to a different solver
         model.objective = pyo.Objective(
-            expr=sum(model.p[j] for j in model.J),
+            expr=sum(model.x[i, j] * model.d[i, j] for i in model.I for j in model.J),
             sense=pyo.maximize
         )
     
@@ -115,7 +112,6 @@ def main():
 
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
-    population1 = edited_data['estimated_population'].tolist()
     latitude1 = edited_data['latitude'].tolist()
     longitude1 = edited_data['longitude'].tolist()
 
@@ -133,9 +129,16 @@ def main():
 
     # Run the model
     if st.button("Run Model"):
-        model = create_model(dist_mat, population1, P, objective_type)
+        model = create_model(dist_mat, P, objective_type)
         solver = pyo.SolverFactory('glpk')
-        results = solver.solve(model)
+
+        # Ensure the solver is correctly applied
+        results = solver.solve(model, tee=True)
+
+        # Check solver status
+        if results.solver.status != pyo.SolverStatus.ok:
+            st.error(f"Solver status: {results.solver.status}. Model may not be solved correctly.")
+            return
 
         # Extract results
         support_centers = [Zipcode1[i - 1] for i in model.I if pyo.value(model.y[i]) == 1]

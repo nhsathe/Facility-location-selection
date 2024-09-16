@@ -108,11 +108,11 @@ def main():
 
     # Allow users to edit the data
     st.write("Edit the input data:")
-    edited_data = st.experimental_data_editor(data, use_container_width=True)
+    edited_data = st.data_editor(data, use_container_width=True)
 
     # Display the edited data
     st.write("Updated input data:")
-    st.table(edited_data)
+    st.dataframe(edited_data)
 
     # Convert edited DataFrame to lists for optimization model
     Zipcode1 = edited_data['zip_code'].tolist()
@@ -123,7 +123,7 @@ def main():
     # Calculate distance matrix
     dist_mat = calculate_distances(edited_data)
     st.write("Distance matrix:")
-    st.table(dist_mat)
+    st.dataframe(dist_mat)
 
     # Select number of support centers and objective function
     P = st.slider("Select number of support centers to be built", min_value=1, max_value=18, value=3)
@@ -150,7 +150,7 @@ def main():
         # Display assignments
         st.write("Assignments:")
         assignment_df = pd.DataFrame([(k, v) for k, vals in assignments.items() for v in vals], columns=['Support Center', 'Assigned Location'])
-        st.table(assignment_df)
+        st.dataframe(assignment_df)
 
         # Prepare data for visualization
         result_data = edited_data[edited_data['zip_code'].isin(support_centers)]

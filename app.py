@@ -140,7 +140,7 @@ def main():
 
         #Display support centers
         st.write("Selected support center locations:")
-        st.dataframe(support_centers,column_config={"column1": "Support Center Locations"})
+        st.dataframe(support_centers,column_config={"value": "Support Center Locations"})
         
 
         for i in model.I:

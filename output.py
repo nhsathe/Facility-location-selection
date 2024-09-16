@@ -43,7 +43,7 @@ def main():
             from output_obj3 import model, Zipcode1
         else:
             pass
-   clear_session_state()
-   st.experimental_rerun()         
+    clear_session_state()
+    st.experimental_rerun()         
 if __name__ == "__main__":
         main()

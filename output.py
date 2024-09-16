@@ -44,6 +44,6 @@ def main():
         else:
             pass
     clear_session_state()
-    st.rerun()         
+       
 if __name__ == "__main__":
         main()

@@ -195,7 +195,7 @@ def main():
         average_lat = edited_data['latitude'].mean()
         average_lon = edited_data['longitude'].mean()
         #fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
-        fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs", mapbox=dict(center=dict(lat=edited_data['latitude'].mean(), lon=edited_data['longitude'].mean()), zoom=10, autosize=True))
+        fig.update_layout(mapbox_style="open-street-map", height=800, zoom=10, title="Location Assignments and Costs", mapbox=dict(center=dict(lat=edited_data['latitude'].mean(), lon=edited_data['longitude'].mean()), zoom=10, autosize=True))
         st.plotly_chart(fig)
 
         st.write("Model Results:")

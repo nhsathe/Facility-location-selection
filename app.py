@@ -198,7 +198,7 @@ def main():
         fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs", mapbox=dict(center=dict(lat=edited_data['latitude'].mean(), lon=edited_data['longitude'].mean()), zoom=10))
         st.plotly_chart(fig)
 
-        st.code(model.pprint(), language="python")
+        st.code(model.pprint())
         st.code(results.write(), language="text")
 
 

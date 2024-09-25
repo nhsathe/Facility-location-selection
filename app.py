@@ -198,9 +198,8 @@ def main():
         fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs", mapbox=dict(center=dict(lat=edited_data['latitude'].mean(), lon=edited_data['longitude'].mean()), zoom=10))
         st.plotly_chart(fig)
 
-        st.write("Model Results:")
-        st.write(f"Objective Value: {pyo.value(model.objective)}")
-        st.write("Model details:")
+        st.code(model.printString())
+
         model.pprint()
 
 if __name__ == "__main__":

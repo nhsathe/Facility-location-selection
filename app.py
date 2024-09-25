@@ -192,7 +192,7 @@ def main():
                     name=f'Cost: {distance:.2f}'
                 ))
 
-        fig.update_layout(mapbox_style="open-street-map", height=800, title="Location Assignments and Costs")
+        fig.update_layout(mapbox_style="open-street-map", height=800,zoom = 10, title="Location Assignments and Costs")
         st.plotly_chart(fig)
 
         st.write("Model Results:")

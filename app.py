@@ -95,7 +95,7 @@ def main():
 
     # Allow users to edit the data
     st.write("Input data:")
-    edited_data = st.data_editor(data, use_container_width=True)
+    edited_data = st.data_editor(data, use_container_width=True, num_rows="dynamic")
 
 
 
